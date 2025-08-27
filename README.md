@@ -18,6 +18,33 @@ The typical runtime flow is: **HTTP → Endpoint → Command/Query → Handler �
 
 ---
 
+## Real execution flow (example: `POST /users/register`)
+
+This is the full call stack of a typical request in this repo:
+
+1. **HTTP POST `/users/register`** → hits `Web.Api.Endpoints.Users.Register.MapEndpoint`.
+2. Endpoint constructs a `RegisterUserCommand` from the request body.
+3. Dependency Injection resolves `ICommandHandler<RegisterUserCommand, Guid>` (registered via Application DI scan).
+4. The handler `RegisterUserCommandHandler` (in `Application.Users.Register`) executes:
+   - Creates a `User` domain entity.
+   - Calls `user.Raise(new UserRegisteredDomainEvent(user.Id))`.
+   - Adds `user` to `IApplicationDbContext.Users` (which is implemented by `Infrastructure.Database.ApplicationDbContext`).
+   - Calls `SaveChangesAsync` on the DbContext.
+5. `ApplicationDbContext.SaveChangesAsync` calls the `IDomainEventsDispatcher` to dispatch domain events (domain event handlers are resolved and invoked).
+6. Handler returns `Result<Guid>` (functional result).
+7. Endpoint matches and converts `Result` to either `200 OK` or `CustomResults.Problem` (error format).
+8. Response goes to client.
+
+👉 This shows the inward-facing pattern: **endpoints → application → domain → infrastructure (persistence + events)**.
+
+---
+
+## Architecture Diagram
+
+![Clean Architecture Diagram](Architecture-Diagram.png)
+
+---
+
 ## Quick start (local)
 > Tested workflow to build and run the API locally.
 
@@ -87,8 +114,4 @@ Place this in `src/Web.Api/appsettings.Development.json` or set the values via e
 > **Important:** Never commit production secrets to the repo. Use user secrets or a secure vault.
 
 ---
-
-## Architecture Diagram
-
-![Clean Architecture Diagram](Architecture-Diagram.png)
 
