@@ -1,6 +1,6 @@
 # CleanArchitecture
 
-This README is a concise onboarding guide for the `CleanArchitecture` solution you uploaded. It contains build/run instructions, environment variables, quick troubleshooting notes, and a small visual architecture diagram (Mermaid) you can paste into GitHub READMEs.
+This README is a concise onboarding guide for the `CleanArchitecture` solution you uploaded. It contains build/run instructions, environment variables, quick troubleshooting notes, and a small visual architecture diagram (Mermaid).
 
 ---
 
@@ -88,30 +88,7 @@ Place this in `src/Web.Api/appsettings.Development.json` or set the values via e
 
 ---
 
-## Architecture diagram (Mermaid)
+## Architecture Diagram
 
-```mermaid
-flowchart LR
-  subgraph Web.Api[Presentation]
-    A[HTTP Request]\n(Controller/Endpoint)
-  end
-  subgraph Application[Application]
-    B[Command / Query]
-    C[Handler]
-    D[Validators / Decorators]
-  end
-  subgraph Domain[Domain]
-    E[Entities / Value Objects]
-    F[Domain Events]
-  end
-  subgraph Infrastructure[Infrastructure]
-    G[DbContext / Repositories]
-    H[External Services (Email, Storage)]
-  end
+![Clean Architecture Diagram](Architecture-Diagram.png)
 
-  A --> B --> C --> E
-  C --> G
-  E -- raises --> F
-  G -- SaveChanges --> F
-  F --> H
-```
